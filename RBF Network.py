@@ -10,6 +10,8 @@ y_lower_interval = -1
 y_upper_interval = 1
 step_length = 0.1
 
+learning_rate = 0.01
+
 # Class that represents a 2d input and what type it should be classified as
 class Node:
     def __init__(self, x, y, v):
@@ -25,7 +27,7 @@ class Node:
 def mean_squared_error( expected, predicted ):
 	return np.sum((expected - predicted) ** 2)/len(expected)
 
-# Like mean_squared_error but without dividing the result by total length
+# Squared error
 def squared_error( expected, predicted ):
 	return np.sum((expected - predicted) ** 2)
 	
@@ -71,12 +73,33 @@ for p in range (0, len(sin_training_input_pattern)):
 	for n in range (0, len(RBF_Nodes)):
 		phi[p][n] = transfer_function(sin_training_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
 
-# Calculate weights
-weight = np.linalg.solve(phi.T @ phi, phi.T @ sin_training_output_pattern)
-output_pattern = np.sum(phi * weight, axis = 1)
-print(squared_error(sin_training_output_pattern, output_pattern))
+# Calculate weights using Least squares
+least_squares_weight = np.linalg.solve(phi.T @ phi, phi.T @ sin_training_output_pattern)
+output_pattern = np.sum(phi * least_squares_weight, axis = 1)
+print("Least squares error:", squared_error(sin_training_output_pattern, output_pattern))
 
-	
+# Calculate weights using Delta rule
+sequential_weight = []
+batch_weight = []
+for i in range(0, len(weight)):
+	sequential_weight.append(weight[i])
+	batch_weight.append(weight[i])
+
+epochs = 100
+
+# Sequential Delta rule
+for i in range(0, epochs):
+	for o in range(0, len(output_pattern)):
+		sequential_weight = sequential_weight + (learning_rate*(sin_training_output_pattern[o] - np.sum(phi[o] * sequential_weight))*(phi[o]))
+	sequential_output_pattern = np.sum(phi * sequential_weight, axis = 1)
+	print("Sequential Delta rule error:", squared_error(sin_training_output_pattern, sequential_output_pattern))
+
+# Batch Delta rule
+for i in range(0, epochs):
+	batch_output_pattern = np.sum(phi * batch_weight, axis = 1)
+	batch_weight = batch_weight + (learning_rate*(sin_training_output_pattern - batch_output_pattern)*phi)
+	print("Batch Delta rule error:", squared_error(sin_training_output_pattern, batch_output_pattern))
+
 '''	
 # Plot function and nodes
 X = []
