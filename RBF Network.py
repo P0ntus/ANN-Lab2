@@ -41,9 +41,15 @@ def euclidean_distance(x1, y1, x2, y2):
 def sin_function(x):
 	return math.sin(2*x)
 	
+def square_function(x):
+	if (math.sin(2*x) > 0): 
+		return 1
+	return -1
+	
 	
 # Generate function data
 
+# SIN DATA----------------------------------------------------------------------------------------------------------
 # Training patterns - Generate values between 0 and 2π with step length 0.1 using our sin_function
 sin_training_input_pattern = np.asarray(np.arange(x_lower_interval, x_upper_interval, step_length))
 sin_training_output_pattern = list(map(sin_function, sin_training_input_pattern))
@@ -51,6 +57,17 @@ sin_training_output_pattern = list(map(sin_function, sin_training_input_pattern)
 # Testing patterns - Generate values between 0.05 and 2π with step length 0.1 using our sin_function
 sin_test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length/2), x_upper_interval, step_length))
 sin_test_output_pattern = list(map(sin_function, sin_test_input_pattern))
+# SIN DATA----------------------------------------------------------------------------------------------------------
+
+# SQUARE DATA-------------------------------------------------------------------------------------------------------
+# Training patterns - Generate values between 0 and 2π with step length 0.1 using our square_function
+square_training_input_pattern = np.asarray(np.arange(x_lower_interval, x_upper_interval, step_length))
+square_training_output_pattern = list(map(square_function, square_training_input_pattern))
+
+# Testing patterns - Generate values between 0.05 and 2π with step length 0.1 using our square_function
+square_test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length/2), x_upper_interval, step_length))
+square_test_output_pattern = list(map(square_function, square_test_input_pattern))
+# SQUARE DATA-------------------------------------------------------------------------------------------------------
 
 # Initiate RBF nodes
 NUM_NODES_ROW = len(sin_training_output_pattern)
@@ -78,6 +95,7 @@ least_squares_weight = np.linalg.solve(phi.T @ phi, phi.T @ sin_training_output_
 output_pattern = np.sum(phi * least_squares_weight, axis = 1)
 print("Least squares error:", squared_error(sin_training_output_pattern, output_pattern))
 
+'''
 # Calculate weights using Delta rule
 sequential_weight = []
 batch_weight = []
@@ -99,9 +117,13 @@ for i in range(0, epochs):
 	batch_output_pattern = np.sum(phi * batch_weight, axis = 1)
 	batch_weight = batch_weight + (learning_rate*(sin_training_output_pattern - batch_output_pattern)*phi)
 	print("Batch Delta rule error:", squared_error(sin_training_output_pattern, batch_output_pattern))
+'''
 
-'''	
-# Plot function and nodes
+# Plot
+ax = plt.gca()
+
+'''
+# Plot nodes
 X = []
 Y = []
 Circles = []
@@ -110,13 +132,18 @@ for node in RBF_Nodes:
 	Y.append(node.y)
 	Circles.append(plt.Circle((node.x, node.y), node.variance, color='k', fill=False))
 
-ax = plt.gca()
-ax.plot(sin_training_input_pattern, sin_training_output_pattern)
+
 ax.plot(X, Y, "ro")
 
 for circle in Circles:
 	ax.add_artist(circle)
+'''
+
+# Plot generated data
+ax.plot(sin_training_input_pattern, sin_training_output_pattern)
+ax.plot(square_training_input_pattern, square_training_output_pattern)
 
 plt.show()
-'''
+
+
 
