@@ -2,6 +2,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+np.set_printoptions(threshold=np.nan) #Always print the whole matrix
+
 x_lower_interval = 0
 x_upper_interval = 2*math.pi
 y_lower_interval = -1
@@ -30,6 +32,9 @@ def squared_error( expected, predicted ):
 # We use Gaussian RBF's with the following transfer function
 def transfer_function(x, position, variance):
 	return (math.exp((-(x - position)**2) / (2*(variance**2))))
+
+def euclidean_distance(x1, y1, x2, y2):
+	return (math.sqrt(((x1 - x2)**2) + ((y1 - y2)**2)))
 	
 def sin_function(x):
 	return math.sin(2*x)
@@ -42,12 +47,11 @@ sin_training_input_pattern = np.asarray(np.arange(x_lower_interval, x_upper_inte
 sin_training_output_pattern = list(map(sin_function, sin_training_input_pattern))
 
 # Testing patterns - Generate values between 0.05 and 2π with step length 0.1 using our sin_function
-sin_test_input_pattern = np.asarray(np.arange(x_lower_interval + 0.05, x_upper_interval, step_length))
+sin_test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length/2), x_upper_interval, step_length))
 sin_test_output_pattern = list(map(sin_function, sin_test_input_pattern))
 
-
 # Initiate RBF nodes
-NUM_NODES_ROW = 4
+NUM_NODES_ROW = len(sin_training_output_pattern)
 NUM_NODES_COL = 1
 variance = 1.25
 mu, sigma = 0, 0.1 # used for weight initialization
@@ -67,12 +71,11 @@ for p in range (0, len(sin_training_input_pattern)):
 	for n in range (0, len(RBF_Nodes)):
 		phi[p][n] = transfer_function(sin_training_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
 
-# Calculate weights (THE ERROR IS CURRENTLY NOT DECREASING)
-for p in range (0, 10000):
-	output_pattern = np.sum(phi * weight, axis = 1)
-	print(squared_error(sin_training_output_pattern, output_pattern))
-	weight += 0.001 * np.linalg.solve(np.dot(np.transpose(phi), (phi * weight)), np.dot(np.transpose(phi), (sin_training_output_pattern)))
-	
+# Calculate weights
+weight = np.linalg.solve(phi.T @ phi, phi.T @ sin_training_output_pattern)
+output_pattern = np.sum(phi * weight, axis = 1)
+print(squared_error(sin_training_output_pattern, output_pattern))
+
 	
 '''	
 # Plot function and nodes
