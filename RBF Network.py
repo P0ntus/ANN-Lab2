@@ -49,7 +49,7 @@ def square_function(x):
 	if (math.sin(2*x) > 0): 
 		return 1
 	return -1
-
+	
 # Sets values in input_pattern that are >= 0 to 1 and values < 0 to -1
 def binary(input_pattern):
 	for v in range (0, len(input_pattern)):
@@ -58,6 +58,14 @@ def binary(input_pattern):
 		else:
 			input_pattern[v] = -1
 	return input_pattern
+	
+# Adds noise to input_pattern and then returns it as output_pattern
+def noise(input_pattern):
+	output_pattern = []
+	for i in range(0, len(input_pattern)):
+		output_pattern.append(input_pattern[i] + np.random.normal(0, 0.1, 1)[0])
+	return output_pattern
+
 	
 # Generate function data
 
@@ -199,7 +207,9 @@ for circle in Circles:
 	ax.add_artist(circle)
 
 # Plot data
-ax.plot(square_test_input_pattern, square_least_squares_output_pattern)
+
+ax.plot(sin_test_input_pattern, sin_test_output_pattern)
+ax.plot(sin_test_input_pattern, noise(sin_test_output_pattern))
 
 plt.show()
 '''
