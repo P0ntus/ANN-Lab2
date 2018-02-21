@@ -24,12 +24,16 @@ class Node:
         return "member of Test"
 
 # Mean squared error
-def mean_squared_error( expected, predicted ):
+def mean_squared_error(expected, predicted):
 	return np.sum((expected - predicted) ** 2)/len(expected)
 
 # Squared error
-def squared_error( expected, predicted ):
+def squared_error(expected, predicted):
 	return np.sum((expected - predicted) ** 2)
+	
+# Absolute residual error
+def absolute_residual_error(expected, predicted):
+	return np.sum(abs(expected - predicted))/len(expected)
 	
 # We use Gaussian RBF's with the following transfer function
 def transfer_function(x, position, variance):
@@ -69,60 +73,98 @@ square_test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length
 square_test_output_pattern = list(map(square_function, square_test_input_pattern))
 # SQUARE DATA-------------------------------------------------------------------------------------------------------
 
-# Initiate RBF nodes
-NUM_NODES_ROW = len(sin_training_output_pattern)
-NUM_NODES_COL = 1
-variance = 1.25
-mu, sigma = 0, 0.1 # used for weight initialization
-RBF_Nodes = []
-weight = []
-for c in range(0, NUM_NODES_COL):
-	for r in range(0, NUM_NODES_ROW):
-		x = (x_lower_interval + ((x_upper_interval - x_lower_interval)/NUM_NODES_ROW/2)) + r * ((x_upper_interval - x_lower_interval)/NUM_NODES_ROW)
-		y = (y_lower_interval + ((y_upper_interval - y_lower_interval)/NUM_NODES_COL/2)) + c * ((y_upper_interval - y_lower_interval)/NUM_NODES_COL)
-		weight.append(np.random.normal(mu, sigma, 1)[0])
-		#weight = 1
-		RBF_Nodes.append(Node(x, y, variance))
-		
-# Calculate phi
-phi = np.zeros((len(sin_training_input_pattern), len(RBF_Nodes)))
-for p in range (0, len(sin_training_input_pattern)):
-	for n in range (0, len(RBF_Nodes)):
-		phi[p][n] = transfer_function(sin_training_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
+for nodes in range(1, 20):
+	# Initiate RBF nodes and WEIGHTS
+	NUM_NODES_ROW = nodes # Using len(sin_training_output_pattern) or len(square_training_output_pattern) gives good results
+	NUM_NODES_COL = 1
+	variance = 1
+	mu, sigma = 0, 0.1 # used for weight initialization
+	RBF_Nodes = []
+	weight = []
+	for c in range(0, NUM_NODES_COL):
+		for r in range(0, NUM_NODES_ROW):
+			x = (x_lower_interval + ((x_upper_interval - x_lower_interval)/NUM_NODES_ROW/2)) + r * ((x_upper_interval - x_lower_interval)/NUM_NODES_ROW)
+			y = (y_lower_interval + ((y_upper_interval - y_lower_interval)/NUM_NODES_COL/2)) + c * ((y_upper_interval - y_lower_interval)/NUM_NODES_COL)
+			weight.append(np.random.normal(mu, sigma, 1)[0])
+			RBF_Nodes.append(Node(x, y, variance))
 
-# Calculate weights using Least squares
-least_squares_weight = np.linalg.solve(phi.T @ phi, phi.T @ sin_training_output_pattern)
-output_pattern = np.sum(phi * least_squares_weight, axis = 1)
-print("Least squares error:", squared_error(sin_training_output_pattern, output_pattern))
+	# Calculate SIN phi
+	sin_train_phi = np.zeros((len(sin_training_input_pattern), len(RBF_Nodes)))
+	sin_test_phi = np.zeros((len(sin_training_input_pattern), len(RBF_Nodes)))
+	for p in range (0, len(sin_training_input_pattern)):
+		for n in range (0, len(RBF_Nodes)):
+			sin_train_phi[p][n] = transfer_function(sin_training_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
+			sin_test_phi[p][n] = transfer_function(sin_test_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
+			
+	# Calculate SQUARE phi
+	square_train_phi = np.zeros((len(square_training_input_pattern), len(RBF_Nodes)))
+	square_test_phi = np.zeros((len(square_training_input_pattern), len(RBF_Nodes)))
+	for p in range (0, len(square_training_input_pattern)):
+		for n in range (0, len(RBF_Nodes)):
+			square_train_phi[p][n] = transfer_function(square_training_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
+			square_test_phi[p][n] = transfer_function(square_test_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
+
+
+	# Least squares
+	# SIN calculate weights and absolute residual error 
+	sin_least_squares_weight = np.linalg.solve(sin_train_phi.T @ sin_train_phi, sin_train_phi.T @ sin_training_output_pattern)
+	output_pattern = np.sum(sin_test_phi * sin_least_squares_weight, axis = 1)
+	#print("Nodes:", nodes, "SIN Least squares absolute residual error:", absolute_residual_error(sin_test_output_pattern, output_pattern))
+
+	#SQUARE calculate weights and absolute residual error
+	square_least_squares_weight = np.linalg.solve(square_train_phi.T @ square_train_phi, square_train_phi.T @ square_training_output_pattern)
+	output_pattern = np.sum(square_test_phi * square_least_squares_weight, axis = 1)
+	print("Nodes:", nodes, "SQUARE Least squares absolute residual error:", absolute_residual_error(square_test_output_pattern, output_pattern))
+
+
+	# Delta rule
+	# Initiate weights
+	sin_sequential_weight  = []
+	square_sequential_weight = []
+	sin_batch_weight = []
+	square_batch_weight = []
+	for i in range(0, len(weight)):
+		sin_sequential_weight.append(weight[i])
+		square_sequential_weight.append(weight[i])
+		sin_batch_weight.append(weight[i])
+		square_batch_weight.append(weight[i])
+
+	epochs = 1000
+	
+	# Sequential Delta rule--------------------------------------------------------------------------------------------------------------------------------------------
+	# SIN
+	for i in range(0, epochs):
+		for o in range(0, len(sin_training_output_pattern)):
+			sin_sequential_weight = sin_sequential_weight + (learning_rate*(sin_training_output_pattern[o] - np.sum(sin_train_phi[o] * sin_sequential_weight))*(sin_train_phi[o]))
+		sin_sequential_output_pattern = np.sum(sin_test_phi * sin_sequential_weight, axis = 1)
+	print("Nodes:", nodes, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
+	# SQUARE
+	for i in range(0, epochs):
+		for o in range(0, len(square_training_output_pattern)):
+			square_sequential_weight = square_sequential_weight + (learning_rate*(square_training_output_pattern[o] - np.sum(square_train_phi[o] * square_sequential_weight))*(square_train_phi[o]))
+		square_sequential_output_pattern = np.sum(square_test_phi * square_sequential_weight, axis = 1)
+	print("Nodes:", nodes, "SQUARE Sequential SQUARE Delta rule error:", squared_error(square_test_output_pattern, square_sequential_output_pattern))
+	# Sequential Delta rule--------------------------------------------------------------------------------------------------------------------------------------------
+	
+	# Batch Delta rule-------------------------------------------------------------------------------------------------------------------------------------------------
+	# SIN
+	for i in range(0, epochs):
+		sin_batch_output_pattern = np.sum(sin_train_phi * sin_batch_weight, axis = 1)
+		sin_batch_weight = sin_batch_weight + (learning_rate*np.sum((sin_training_output_pattern - sin_batch_output_pattern)*sin_train_phi.T, axis = 1))
+	sin_batch_output_pattern = np.sum(sin_test_phi * sin_batch_weight, axis = 1)
+	print("Nodes:", nodes, "SIN Batch Delta rule error:", squared_error(sin_test_output_pattern, sin_batch_output_pattern))
+	# SQUARE
+	for i in range(0, epochs):
+		square_batch_output_pattern = np.sum(square_train_phi * square_batch_weight, axis = 1)
+		square_batch_weight = square_batch_weight + (learning_rate*np.sum((square_training_output_pattern - square_batch_output_pattern)*square_train_phi.T, axis = 1))
+	square_batch_output_pattern = np.sum(square_test_phi * square_batch_weight, axis = 1)
+	print("Nodes:", nodes, "SQUARE Batch Delta rule error:", squared_error(square_test_output_pattern, square_batch_output_pattern))
+	# Batch Delta rule-------------------------------------------------------------------------------------------------------------------------------------------------
 
 '''
-# Calculate weights using Delta rule
-sequential_weight = []
-batch_weight = []
-for i in range(0, len(weight)):
-	sequential_weight.append(weight[i])
-	batch_weight.append(weight[i])
-
-epochs = 100
-
-# Sequential Delta rule
-for i in range(0, epochs):
-	for o in range(0, len(output_pattern)):
-		sequential_weight = sequential_weight + (learning_rate*(sin_training_output_pattern[o] - np.sum(phi[o] * sequential_weight))*(phi[o]))
-	sequential_output_pattern = np.sum(phi * sequential_weight, axis = 1)
-	print("Sequential Delta rule error:", squared_error(sin_training_output_pattern, sequential_output_pattern))
-
-# Batch Delta rule
-for i in range(0, epochs):
-	batch_output_pattern = np.sum(phi * batch_weight, axis = 1)
-	batch_weight = batch_weight + (learning_rate*(sin_training_output_pattern - batch_output_pattern)*phi)
-	print("Batch Delta rule error:", squared_error(sin_training_output_pattern, batch_output_pattern))
-'''
-
 # Plot
 ax = plt.gca()
 
-'''
 # Plot nodes
 X = []
 Y = []
@@ -137,13 +179,12 @@ ax.plot(X, Y, "ro")
 
 for circle in Circles:
 	ax.add_artist(circle)
-'''
 
 # Plot generated data
 ax.plot(sin_training_input_pattern, sin_training_output_pattern)
 ax.plot(square_training_input_pattern, square_training_output_pattern)
 
 plt.show()
-
+'''
 
 
