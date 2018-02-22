@@ -10,7 +10,7 @@ y_lower_interval = -1
 y_upper_interval = 1
 step_length = 0.1
 
-learning_rate = 0.001
+learning_rate = 0.1
 
 # Class that represents a 2d input and what type it should be classified as
 class Node:
@@ -77,6 +77,14 @@ sin_training_output_pattern = list(map(sin_function, sin_training_input_pattern)
 # Testing patterns - Generate values between 0.05 and 2π with step length 0.1 using our sin_function
 sin_test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length/2), x_upper_interval, step_length))
 sin_test_output_pattern = list(map(sin_function, sin_test_input_pattern))
+
+# Add noise
+noise_array = [0] * len(sin_training_input_pattern)
+noise_array = np.asarray(noise(noise_array))
+sin_training_output_pattern = sin_training_output_pattern + noise_array
+sin_test_output_pattern = sin_test_output_pattern + noise_array
+#sin_training_input_pattern = sin_training_input_pattern + noise_array
+#sin_test_input_pattern = sin_test_input_pattern + noise_array
 # SIN DATA----------------------------------------------------------------------------------------------------------
 
 # SQUARE DATA-------------------------------------------------------------------------------------------------------
@@ -89,11 +97,11 @@ square_test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length
 square_test_output_pattern = list(map(square_function, square_test_input_pattern))
 # SQUARE DATA-------------------------------------------------------------------------------------------------------
 
-for nodes in range(len(sin_training_output_pattern), len(sin_training_output_pattern)+1):
+for nodes in range(0, len(square_training_output_pattern) + 1):
 	# Initiate RBF nodes and WEIGHTS
 	NUM_NODES_ROW = nodes # Using len(sin_training_output_pattern) or len(square_training_output_pattern) gives good results
 	NUM_NODES_COL = 1
-	variance = 1
+	variance = 0.5
 	mu, sigma = 0, 0.1 # used for weight initialization
 	RBF_Nodes = []
 	weight = []
@@ -126,13 +134,14 @@ for nodes in range(len(sin_training_output_pattern), len(sin_training_output_pat
 	sin_least_squares_weight = np.linalg.solve(sin_train_phi.T @ sin_train_phi, sin_train_phi.T @ sin_training_output_pattern)
 	sin_least_squares_output_pattern = np.sum(sin_test_phi * sin_least_squares_weight, axis = 1)
 	print("Nodes:", nodes, "SIN Least squares absolute residual error:", absolute_residual_error(sin_test_output_pattern, sin_least_squares_output_pattern))
-	
+
+	'''
 	#SQUARE calculate weights and absolute residual error
 	square_least_squares_weight = np.linalg.solve(square_train_phi.T @ square_train_phi, square_train_phi.T @ square_training_output_pattern)
 	square_least_squares_output_pattern = np.sum(square_test_phi * square_least_squares_weight, axis = 1)
 	binary(square_least_squares_output_pattern)
 	print("Nodes:", nodes, "SQUARE Least squares absolute residual error:", absolute_residual_error(square_test_output_pattern, square_least_squares_output_pattern))
-
+	'''
 
 	# Delta rule
 	# Initiate weights
@@ -145,8 +154,8 @@ for nodes in range(len(sin_training_output_pattern), len(sin_training_output_pat
 		square_sequential_weight.append(weight[i])
 		sin_batch_weight.append(weight[i])
 		square_batch_weight.append(weight[i])
-
-	epochs = 1000
+	'''
+	epochs = 100
 
 	# Sequential Delta rule--------------------------------------------------------------------------------------------------------------------------------------------
 	# SIN
@@ -156,7 +165,8 @@ for nodes in range(len(sin_training_output_pattern), len(sin_training_output_pat
 		sin_sequential_output_pattern = np.sum(sin_test_phi * sin_sequential_weight, axis = 1)
 		#print("Epoch:", i, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
 	print("Nodes:", nodes, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
-
+	'''
+	'''
 	# SQUARE
 	for i in range(0, epochs):
 		for o in range(0, len(square_training_output_pattern)):
@@ -187,7 +197,7 @@ for nodes in range(len(sin_training_output_pattern), len(sin_training_output_pat
 	binary(square_batch_output_pattern)
 	print("Nodes:", nodes, "SQUARE Batch Delta rule error:", squared_error(square_test_output_pattern, square_batch_output_pattern))
 	# Batch Delta rule-------------------------------------------------------------------------------------------------------------------------------------------------
-
+	'''
 	
 '''
 # Plot
@@ -208,8 +218,8 @@ for circle in Circles:
 
 # Plot data
 
+ax.plot(sin_training_input_pattern, sin_training_output_pattern)
 ax.plot(sin_test_input_pattern, sin_test_output_pattern)
-ax.plot(sin_test_input_pattern, noise(sin_test_output_pattern))
 
 plt.show()
 '''
