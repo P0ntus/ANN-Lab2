@@ -70,11 +70,11 @@ def noise(input_pattern):
 # Generate function data
 
 # SIN DATA----------------------------------------------------------------------------------------------------------
-# Training patterns - Generate values between 0 and 2π with step length 0.1 using our sin_function
+# Training patterns - Generate values between 0 and 2pi with step length 0.1 using our sin_function
 sin_training_input_pattern = np.asarray(np.arange(x_lower_interval, x_upper_interval, step_length))
 sin_training_output_pattern = list(map(sin_function, sin_training_input_pattern))
 
-# Testing patterns - Generate values between 0.05 and 2π with step length 0.1 using our sin_function
+# Testing patterns - Generate values between 0.05 and 2pi with step length 0.1 using our sin_function
 sin_test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length/2), x_upper_interval, step_length))
 sin_test_output_pattern = list(map(sin_function, sin_test_input_pattern))
 
@@ -88,11 +88,11 @@ sin_test_output_pattern = sin_test_output_pattern + noise_array
 # SIN DATA----------------------------------------------------------------------------------------------------------
 
 # SQUARE DATA-------------------------------------------------------------------------------------------------------
-# Training patterns - Generate values between 0 and 2π with step length 0.1 using our square_function
+# Training patterns - Generate values between 0 and 2pi with step length 0.1 using our square_function
 square_training_input_pattern = np.asarray(np.arange(x_lower_interval, x_upper_interval, step_length))
 square_training_output_pattern = list(map(square_function, square_training_input_pattern))
 
-# Testing patterns - Generate values between 0.05 and 2π with step length 0.1 using our square_function
+# Testing patterns - Generate values between 0.05 and 2pi with step length 0.1 using our square_function
 square_test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length/2), x_upper_interval, step_length))
 square_test_output_pattern = list(map(square_function, square_test_input_pattern))
 # SQUARE DATA-------------------------------------------------------------------------------------------------------
@@ -131,13 +131,13 @@ for nodes in range(0, len(square_training_output_pattern) + 1):
 
 	# Least squares
 	# SIN calculate weights and absolute residual error 
-	sin_least_squares_weight = np.linalg.solve(sin_train_phi.T @ sin_train_phi, sin_train_phi.T @ sin_training_output_pattern)
+	sin_least_squares_weight = np.linalg.solve(np.matmul(sin_train_phi.T, sin_train_phi), np.matmul(sin_train_phi.T, sin_training_output_pattern))
 	sin_least_squares_output_pattern = np.sum(sin_test_phi * sin_least_squares_weight, axis = 1)
 	print("Nodes:", nodes, "SIN Least squares absolute residual error:", absolute_residual_error(sin_test_output_pattern, sin_least_squares_output_pattern))
 
 	'''
 	#SQUARE calculate weights and absolute residual error
-	square_least_squares_weight = np.linalg.solve(square_train_phi.T @ square_train_phi, square_train_phi.T @ square_training_output_pattern)
+	square_least_squares_weight = np.linalg.solve(np.matmul(square_train_phi.T, square_train_phi), np.matmul(square_train_phi.T, square_training_output_pattern))
 	square_least_squares_output_pattern = np.sum(square_test_phi * square_least_squares_weight, axis = 1)
 	binary(square_least_squares_output_pattern)
 	print("Nodes:", nodes, "SQUARE Least squares absolute residual error:", absolute_residual_error(square_test_output_pattern, square_least_squares_output_pattern))
