@@ -2,6 +2,9 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
+
+from sklearn.neural_network import MLPRegressor
 
 np.set_printoptions(threshold=np.nan) #Always print the whole matrix
 
@@ -101,6 +104,7 @@ for nodes in range(33, 34):
 	# SIN DATA----------------------------------------------------------------------------------------------------------
 	# Training patterns - Generate values between 0 and 2pi with step length 0.1 using our sin_function
 	sin_training_input_pattern = np.asarray(np.arange(x_lower_interval, x_upper_interval, step_length))
+	#sin_training_input_pattern[0] += 0.0001
 	#sin_training_input_pattern = noise(sin_training_input_pattern)
 	sin_training_output_pattern = list(map(sin_function, sin_training_input_pattern))
 
@@ -166,13 +170,13 @@ for nodes in range(33, 34):
 			square_train_phi[p][n] = transfer_function(square_training_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
 			square_test_phi[p][n] = transfer_function(square_test_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
 	'''
-	'''
+	
 	# Least squares
 	# SIN calculate weights and absolute residual error 
 	sin_least_squares_weight = np.linalg.solve(np.matmul(sin_train_phi.T, sin_train_phi), np.matmul(sin_train_phi.T, sin_training_output_pattern))
 	sin_least_squares_output_pattern = np.sum(sin_test_phi * sin_least_squares_weight, axis = 1)
 	print("Nodes:", nodes, "SIN Least squares absolute residual error:", absolute_residual_error(sin_test_output_pattern, sin_least_squares_output_pattern))
-	'''
+	
 	'''
 	#SQUARE calculate weights and absolute residual error
 	square_least_squares_weight = np.linalg.solve(np.matmul(square_train_phi.T, square_train_phi), np.matmul(square_train_phi.T, square_training_output_pattern))
@@ -181,6 +185,7 @@ for nodes in range(33, 34):
 	print("Nodes:", nodes, "SQUARE Least squares absolute residual error:", absolute_residual_error(square_test_output_pattern, square_least_squares_output_pattern))
 	'''
 
+	'''
 	# Delta rule
 	# Initiate weights
 	sin_sequential_weight  = []
@@ -211,7 +216,7 @@ for nodes in range(33, 34):
 		RANDOM_errors.append(squared_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
 		print("Epoch:", i, "RANDOM SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
 	#print("Nodes:", nodes, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
-	
+	'''
 	'''
 	# SQUARE
 	for i in range(0, epochs):
@@ -244,6 +249,35 @@ for nodes in range(33, 34):
 	print("Nodes:", nodes, "SQUARE Batch Delta rule error:", squared_error(square_test_output_pattern, square_batch_output_pattern))
 	# Batch Delta rule-------------------------------------------------------------------------------------------------------------------------------------------------
 	'''
+	#print(sin_training_output_pattern)
+	#sin_training_input_pattern = np.array(sin_training_output_pattern)
+	sin_training_input_pattern = sin_training_input_pattern.reshape(len(sin_training_input_pattern), 1)
+	sin_training_output_pattern = np.array(sin_training_output_pattern)
+	#sin_training_output_pattern = sin_training_output_pattern.reshape(len(sin_training_output_pattern), 1)
+	sin_test_input_pattern = np.array(sin_test_input_pattern)
+	sin_test_input_pattern = sin_test_input_pattern.reshape(len(sin_test_input_pattern), 1)
+	#print(sin_training_output_pattern)
+	#print()
+	#print(sin_training_output_pattern - training_target_pattern.mean(axis=0))/training_target_pattern.std(axis=0) / 2.5)
+	#sin_training_input_pattern = np.transpose(sin_training_input_pattern)
+	#sin_test_input_pattern = np.transpose(sin_test_input_pattern)
+
+	parser = argparse.ArgumentParser(description='MLP network for Mackey-Glass time series predictions.')
+	parser.add_argument('-n', '--hidden-nodes', type=int, nargs='+', default=30,
+					   help='number of nodes in the hidden layers (max 8 per layer)')
+	parser.add_argument('-l', '--learning-rate', type=float, default=0.001,
+					   help='the learning rate, controls how fast it converges')
+	parser.add_argument('-a', '--alpha', type=float, default=0.0001,
+					   help='the L2 regularization factor')
+	#parser.add_argument('-b', '--batch_size', type=int, default=len(sin_training_input_pattern),
+					  # help='??')
+	args = parser.parse_args()
+	#print(sin_training_input_pattern.shape)
+	#print(sin_training_output_pattern.shape)
+	reg = MLPRegressor(hidden_layer_sizes=args.hidden_nodes, early_stopping=True, max_iter=10000,
+                   learning_rate_init=args.learning_rate, alpha=args.alpha, batch_size=len(sin_training_input_pattern))
+	reg = reg.fit(sin_training_input_pattern, sin_training_output_pattern)
+	two_layer_output = reg.predict(sin_test_input_pattern)
 	
 
 # Plot
@@ -265,8 +299,8 @@ for circle in Circles:
 # Plot data
 #ax.plot(sin_test_input_pattern, sin_sequential_output_pattern)
 #ax.plot(sin_test_input_pattern, sin_test_output_pattern)
-ax.plot(errors)
-ax.plot(RANDOM_errors)
+ax.plot(sin_test_input_pattern, sin_least_squares_output_pattern)
+ax.plot(sin_test_input_pattern, two_layer_output)
 
 plt.show()
 
