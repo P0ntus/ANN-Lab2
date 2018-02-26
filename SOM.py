@@ -26,16 +26,21 @@ attr = animalattr.split("\r\n")
 
 raw_matrix = matrix_a.split(",")
 
-matrix = [ [ int( raw_matrix[j * i] ) for j in range(0, len(attr)) ] for i in range(0,len(animals)) ]
+print( len(animals) )
+
+matrix = [ [ int( raw_matrix[j + i] ) for j in range(0, len(attr)) ] for i in range(0,len(animals)) ]
+
+
 
 # HERE the data is ready --- matrix formated with 84 attributes in each line
+# print( matrix )
 
 #INITIALISATION
 # We generate random weights for a matrix of 100x84 (84 attributes for each node)
 nodes = 100
 weights = []
-mu = 0
-sigma = 0.1
+low = 0
+high = 1
 epochs = 20
 learning_rate = 0.2
 learning_rate_n = 0.2
@@ -67,7 +72,8 @@ class n_parameter:
 
 
 for i in range(0, nodes):
-	weights.append(np.random.normal(mu, sigma, len(attr) ))
+	weights.append(np.random.uniform(low, high, len(attr) ))
+
 
 weights = np.asarray(weights)
 matrix = np.asarray(matrix)
@@ -82,6 +88,9 @@ neightbours_parameter = n_parameter( 50, 1, epochs)
 
 #TRAINING
 for i in range(0, epochs):
+	# Neighbours number
+	n_number = neightbours_parameter.get_number()
+
 	for j in range(0, len(animals)): # len(animalnames) is the number of points we have (inner loop)
 		# New loop to calculate the distance :
 		min_distance = distance( matrix[j], weights[0] )
@@ -97,15 +106,12 @@ for i in range(0, epochs):
 		
 		# Winner update
 		weights[index] += learning_rate * (matrix[j] - weights[index])
-
 		# Neighbourhoods update according to neightbours_parameter and learning_rate_n
 
-		# Neighbours number
-		n_number = neightbours_parameter.get_number()
-
 		for k in range( index-n_number, index+n_number ):
-			if k >= 0 and k < len(animals) :
-				weights[k] += learning_rate_n * (matrix[j] - weights[k])
+			if k >= 100 :
+				k = k % 100
+			weights[k] += learning_rate_n * (matrix[j] - weights[k])
 
 		# learning_rate_n can be a function that reduces against epochs
 	
