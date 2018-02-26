@@ -26,10 +26,16 @@ attr = animalattr.split("\r\n")
 
 raw_matrix = matrix_a.split(",")
 
-print( len(animals) )
+matrix = [ [ int( raw_matrix[j + i * 84] ) for j in range(0, len(attr)) ] for i in range(0, len(animals)) ]
+		
 
-matrix = [ [ int( raw_matrix[j + i] ) for j in range(0, len(attr)) ] for i in range(0,len(animals)) ]
 
+
+for i in range( 0, len(animals)):
+	print( "NEW ---------- " + animals[i] )
+	for j in range( 0, len(attr)):
+		if matrix[i][j] == 1:
+			print( attr[j] )
 
 
 # HERE the data is ready --- matrix formated with 84 attributes in each line
@@ -96,22 +102,24 @@ for i in range(0, epochs):
 		min_distance = distance( matrix[j], weights[0] )
 		index = 0
 
-		for k in range( 1, nodes) : 
+		for k in range( 1, nodes) :
 			result = distance( matrix[j], weights[k] )
 			if min_distance > result :
 				min_distance = result
 				index = k
 		
+
+		
 		# Once we have the index of the winner, we can update the weights of the winner and those of the neighbourhoods
 		
 		# Winner update
 		weights[index] += learning_rate * (matrix[j] - weights[index])
+
 		# Neighbourhoods update according to neightbours_parameter and learning_rate_n
 
 		for k in range( index-n_number, index+n_number ):
-			if k >= 100 :
-				k = k % 100
-			weights[k] += learning_rate_n * (matrix[j] - weights[k])
+			if k >= 0 and k < nodes :
+				weights[k] += learning_rate_n * (matrix[j] - weights[k])
 
 		# learning_rate_n can be a function that reduces against epochs
 	
