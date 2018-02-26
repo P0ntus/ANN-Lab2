@@ -26,17 +26,17 @@ attr = animalattr.split("\r\n")
 
 raw_matrix = matrix_a.split(",")
 
-matrix = [ [ int( raw_matrix[j + i * 84] ) for j in range(0, len(attr)) ] for i in range(0, len(animals)) ]
+matrix = [ [ int( raw_matrix[j + i * len(attr)] ) for j in range(0, len(attr)) ] for i in range(0, len(animals)) ]
 		
 
-
-
+"""
+# For printing some attr
 for i in range( 0, len(animals)):
 	print( "NEW ---------- " + animals[i] )
 	for j in range( 0, len(attr)):
 		if matrix[i][j] == 1:
 			print( attr[j] )
-
+"""
 
 # HERE the data is ready --- matrix formated with 84 attributes in each line
 # print( matrix )
