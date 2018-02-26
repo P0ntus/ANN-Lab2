@@ -14,7 +14,7 @@ y_lower_interval = -2
 y_upper_interval = 2
 step_length = 0.1
 
-learning_rate = 0.01
+#learning_rate = 0.01
 
 random.seed(a=None)
 
@@ -98,7 +98,11 @@ def shuffle_3(A, B, C):
 		B[i] = temp_B[D[i]]
 		C[i] = temp_C[D[i]]
 
-for nodes in range(33, 34):
+simulation_results = []
+for learning in range(2, 3):
+	nodes = 33
+	learning_rate = float(1) / 10**learning
+	print(learning_rate)
 	# Generate function data
 
 	# SIN DATA----------------------------------------------------------------------------------------------------------
@@ -185,7 +189,7 @@ for nodes in range(33, 34):
 	print("Nodes:", nodes, "SQUARE Least squares absolute residual error:", absolute_residual_error(square_test_output_pattern, square_least_squares_output_pattern))
 	'''
 
-	'''
+
 	# Delta rule
 	# Initiate weights
 	sin_sequential_weight  = []
@@ -200,7 +204,7 @@ for nodes in range(33, 34):
 		#sin_batch_weight.append(weight[i])
 		#square_batch_weight.append(weight[i])
 
-	epochs = 10000
+	epochs = 1000
 	
 	# Sequential Delta rule--------------------------------------------------------------------------------------------------------------------------------------------
 	# SIN
@@ -210,13 +214,13 @@ for nodes in range(33, 34):
 			sin_sequential_weight = sin_sequential_weight + (learning_rate*(sin_training_output_pattern[o] - np.sum(sin_train_phi[o] * sin_sequential_weight))*(sin_train_phi[o]))
 			RANDOM_sin_sequential_weight = RANDOM_sin_sequential_weight + (learning_rate*(sin_training_output_pattern[o] - np.sum(RANDOM_sin_train_phi[o] * RANDOM_sin_sequential_weight))*(RANDOM_sin_train_phi[o]))
 		sin_sequential_output_pattern = np.sum(sin_test_phi * sin_sequential_weight, axis = 1)
-		RANDOM_sin_sequential_output_pattern = np.sum(RANDOM_sin_test_phi * RANDOM_sin_sequential_weight, axis = 1)
-		errors.append(squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
-		print("Epoch:", i, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
-		RANDOM_errors.append(squared_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
-		print("Epoch:", i, "RANDOM SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
-	#print("Nodes:", nodes, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
-	'''
+		#RANDOM_sin_sequential_output_pattern = np.sum(RANDOM_sin_test_phi * RANDOM_sin_sequential_weight, axis = 1)
+		errors.append(absolute_residual_error(sin_test_output_pattern, sin_sequential_output_pattern))
+		#print("Epoch:", i, "SIN Sequential Delta rule error:", absolute_residual_error(sin_test_output_pattern, sin_sequential_output_pattern))
+		#RANDOM_errors.append(absolute_residual_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
+		#print("Epoch:", i, "RANDOM SIN Sequential Delta rule error:", absolute_residual_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
+	print("Nodes:", nodes, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
+	simulation_results.append(errors)
 	'''
 	# SQUARE
 	for i in range(0, epochs):
@@ -245,41 +249,47 @@ for nodes in range(33, 34):
 		binary(square_batch_output_pattern)
 		#print("Epoch:", i, "SQUARE Batch Delta rule error:", squared_error(square_test_output_pattern, square_batch_output_pattern))
 	square_batch_output_pattern = np.sum(square_test_phi * square_batch_weight, axis = 1)
-	binary(square_batch_output_pattern)
+	binary(square_batch_ouabsolute_residual_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern)tput_pattern)
 	print("Nodes:", nodes, "SQUARE Batch Delta rule error:", squared_error(square_test_output_pattern, square_batch_output_pattern))
 	# Batch Delta rule-------------------------------------------------------------------------------------------------------------------------------------------------
 	'''
-	#print(sin_training_output_pattern)
-	#sin_training_input_pattern = np.array(sin_training_output_pattern)
-	sin_training_input_pattern = sin_training_input_pattern.reshape(len(sin_training_input_pattern), 1)
-	sin_training_output_pattern = np.array(sin_training_output_pattern)
-	#sin_training_output_pattern = sin_training_output_pattern.reshape(len(sin_training_output_pattern), 1)
-	sin_test_input_pattern = np.array(sin_test_input_pattern)
-	sin_test_input_pattern = sin_test_input_pattern.reshape(len(sin_test_input_pattern), 1)
-	#print(sin_training_output_pattern)
-	#print()
-	#print(sin_training_output_pattern - training_target_pattern.mean(axis=0))/training_target_pattern.std(axis=0) / 2.5)
-	#sin_training_input_pattern = np.transpose(sin_training_input_pattern)
-	#sin_test_input_pattern = np.transpose(sin_test_input_pattern)
-
-	parser = argparse.ArgumentParser(description='MLP network for Mackey-Glass time series predictions.')
-	parser.add_argument('-n', '--hidden-nodes', type=int, nargs='+', default=30,
-					   help='number of nodes in the hidden layers (max 8 per layer)')
-	parser.add_argument('-l', '--learning-rate', type=float, default=0.001,
-					   help='the learning rate, controls how fast it converges')
-	parser.add_argument('-a', '--alpha', type=float, default=0.0001,
-					   help='the L2 regularization factor')
-	#parser.add_argument('-b', '--batch_size', type=int, default=len(sin_training_input_pattern),
-					  # help='??')
-	args = parser.parse_args()
-	#print(sin_training_input_pattern.shape)
-	#print(sin_training_output_pattern.shape)
-	reg = MLPRegressor(hidden_layer_sizes=args.hidden_nodes, early_stopping=True, max_iter=10000,
-                   learning_rate_init=args.learning_rate, alpha=args.alpha, batch_size=len(sin_training_input_pattern))
-	reg = reg.fit(sin_training_input_pattern, sin_training_output_pattern)
-	two_layer_output = reg.predict(sin_test_input_pattern)
 	
+	#ANN
+	parser = argparse.ArgumentParser(description='MLP network for Mackey-Glass time series predictions.')
+	parser.add_argument('-n', '--hidden-nodes', type=int, nargs='+', default=5,
+		           help='number of nodes in the hidden layers (max 8 per layer)')
+	parser.add_argument('-l', '--learning-rate', type=float, default=0.001,
+		           help='the learning rate, controls how fast it converges')
+	parser.add_argument('-a', '--alpha', type=float, default=0.0001,
+		           help='the L2 regularization factor')
+	args = parser.parse_args()
 
+	np.set_printoptions(threshold=np.nan) #Always print the whole matrix
+
+
+	training_input_pattern = np.asarray(np.arange(x_lower_interval, x_upper_interval, step_length))
+	training_target_pattern = list(map(sin_function, training_input_pattern))
+	training_input_pattern = training_input_pattern.reshape(1, -1)
+	test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length/2), x_upper_interval, step_length))
+	test_target_pattern = list(map(sin_function, test_input_pattern))
+
+	#for t in range(0, 5):
+		#input_pattern[t] = normalize(input_pattern[t])
+
+	#target_pattern = normalize(target_pattern)
+
+	input_size = 5
+	output_size = 1
+	hidden_layer_size = 15
+
+	reg = MLPRegressor(hidden_layer_sizes=args.hidden_nodes, early_stopping=True, max_iter=10000,
+		           learning_rate_init=args.learning_rate, alpha=args.alpha)
+	reg = reg.fit(np.transpose(training_input_pattern), training_target_pattern)
+	output = reg.predict(np.transpose(training_input_pattern))
+
+	plt.plot(sin_test_input_pattern, training_target_pattern)
+	
+	
 # Plot
 ax = plt.gca()
 '''
@@ -296,12 +306,45 @@ ax.plot(X, Y, "ro")
 for circle in Circles:
 	ax.add_artist(circle)
 '''
-# Plot data
-#ax.plot(sin_test_input_pattern, sin_sequential_output_pattern)
-#ax.plot(sin_test_input_pattern, sin_test_output_pattern)
-ax.plot(sin_test_input_pattern, sin_least_squares_output_pattern)
-ax.plot(sin_test_input_pattern, two_layer_output)
 
+# Plot data
+ax.plot(sin_test_input_pattern, sin_test_output_pattern)
+ax.plot(sin_test_input_pattern, sin_sequential_output_pattern)
+ax.plot(sin_test_input_pattern, sin_least_squares_output_pattern)
+ax.plot(sin_test_input_pattern, output)
+ax.legend(['y = sin(2x)', 'y = on-line prediction', 'y = batch prediction', 'y = two layer'])
+#plt.ylim( (0, 0.5) )
+#print(simulation_results[0][0:epochs])
+#print(simulation_results[3][0:epochs])
+
+'''
+#ax.plot(simulation_results[0][0:1000])
+ax.plot(simulation_results[0])
+ax.plot(simulation_results[1])
+ax.plot(simulation_results[2])
+ax.plot(simulation_results[3])
+
+ax.legend(['y = 0.1', 'y = 0.01', 'y = 0.001', 'y = 0.0001'])
+
+plt.show()
+'''
+
+'''
+#ax.plot(errors)
+ax.plot(simulation_results[0])
+ax.plot(simulation_results[1])
+ax.plot(simulation_results[2])
+ax.plot(simulation_results[3])
+ax.plot(simulation_results[4])
+ax.plot(simulation_results[5])
+ax.plot(simulation_results[6])
+ax.plot(simulation_results[7])
+ax.plot(simulation_results[8])
+ax.plot(simulation_results[9])
+ax.plot(simulation_results[10])
+
+ax.legend(['y = Manually placed'])
+'''
 plt.show()
 
 
