@@ -59,7 +59,7 @@ votes = [ [ float( raw_votes[j + i * 31] ) for j in range(0, 31) ] for i in rang
 
 #INITIALISATION
 # We generate random weights for a matrix of 100x84 (84 attributes for each node)
-nodes = 10
+nodes = (10, 10) # 2-dimensionnal grid
 weights = []
 low = 0
 high = 1
@@ -93,12 +93,14 @@ class n_parameter:
 		return self.result
 
 
-for i in range(0, nodes):
-	weights.append(np.random.uniform(low, high, len(matrix[0]) ))
+for i in range(0, nodes[0]):
+	weights.append( [] )
+	for j in range(0, nodes[1]):
+		weights[i].append(np.random.uniform(low, high, len(votes[0]) ))
 
 
 weights = np.asarray(weights)
-matrix = np.asarray(matrix)
+votes = np.asarray(votes)
 
 """
 # Print the weights for test :
@@ -110,63 +112,70 @@ print( matrix[0].shape )
 neightbours_parameter = n_parameter( 2, 1, epochs)
 
 #TRAINING
-for i in range(0, epochs):
+for l in range(0, epochs):
 	# Neighbours number
 	n_number = neightbours_parameter.get_number()
 
-	for j in range(0, len(matrix)): # len(animalnames) is the number of points we have (inner loop)
+	for m in range(0, len(matrix_MPs)):
 		# New loop to calculate the distance :
-		min_distance = distance( matrix[j], weights[0] )
-		index = 0
+		min_distance = distance( votes[m], weights[0][0] )
+		index = (0, 0)
+		
 
-		for k in range( 1, nodes) :
-			result = distance( matrix[j], weights[k] )
-			if min_distance > result :
-				min_distance = result
-				index = k
+		for i in range( 0, nodes[0]) :
+			for j in range( 0, nodes[1]) :
+				result = distance( votes[m], weights[i][j] )
+				if min_distance > result :
+					min_distance = result
+					index = (i, j)
 		
 
 		
 		# Once we have the index of the winner, we can update the weights of the winner and those of the neighbourhoods
 		
 		# Winner update
-		weights[index] += learning_rate * (matrix[j] - weights[index])
+		weights[index[0],index[1]] += learning_rate * (votes[m] - weights[index[0],index[1]])
 
 		# Neighbourhoods update according to neightbours_parameter and learning_rate_n
+		for r in range( index[0]-n_number, index[0]+n_number ):
+			if r >= 0 and r < nodes[1]: # Not a cyclic update
+				for k in range( index[1]-n_number, index[1]+n_number ): # We start by updating row neighbours
+					if k >= 0 and k < nodes[0]: # Not a cyclic update
+						weights[k] += learning_rate_n * (votes[m] - weights[r][k])
 
-		for k in range( index-n_number, index+n_number ):
-			if k > nodes: # cyclic tour
-				k = k % nodes
-			weights[k] += learning_rate_n * (matrix[j] - weights[k])
+			
 
 		# learning_rate_n can be a function that reduces against epochs
 
 #PRINT
 # this time we range the weight for each input to find the clothest one, and we save index
 pos = []
-for j in range(0, len(matrix)):
-	min_distance = distance( matrix[j], weights[0] )
-	index = 0
-	for k in range( 1, nodes) :
-		result = distance( matrix[j], weights[k] )
-		if min_distance > result :
-			min_distance = result
-			index = k
+for m in range(0, len(matrix_MPs)):
+	min_distance = distance( votes[m], weights[0][0] )
+	index = (0, 0)
 
-	pos.append( (j,index) )
+	for i in range( 0, nodes[0]) :
+		for j in range( 0, nodes[1]) :
+			result = distance( votes[m], weights[i][j] )
+			if min_distance > result :
+				min_distance = result
+				index = (i, j)
+
+	pos.append( (matrix_MPs[m],index) )
 	
 
-
+"""
 # Sort the list to find similarities of animals
-dtype = [('j', int), ('i', int)]
+ dtype = [('j', int), ('i', int)]
 sorted_array = np.array(pos, dtype=dtype)
 sorted_array = np.sort(sorted_array, order='i')
-
 print( sorted_array )
 
+"""
 
 
-
+# Plot the results
+print( pos )
 
 
 
