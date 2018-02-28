@@ -99,13 +99,17 @@ def shuffle_3(A, B, C):
 		B[i] = temp_B[D[i]]
 		C[i] = temp_C[D[i]]
 
-simulation_results = []
-for nodes in range(21, 22):
+#simulation_results = []
+#Batch_error = []
+#Batch_time = []
+#Two_layer_error = []
+#Two_layer_time = []
+for nodes in range(40, 41):
 	
-	#nodes = node
-	learning_rate = 0.01
+	#nodes = 21
+	learning_rate = 0.001
 	#learning_rate = float(1) / (2**learning)
-	print(nodes)
+	#print(nodes)
 	# Generate function data
 
 	# SIN DATA----------------------------------------------------------------------------------------------------------
@@ -132,27 +136,29 @@ for nodes in range(21, 22):
 	
 	errors = []
 	RANDOM_errors = []
-#for nodes in range(0, 101):
+	#for nodes in range(0, 101):
 	# Initiate RBF nodes and WEIGHTS
 	start = time.time()
 	NUM_NODES_ROW = nodes # Using len(sin_training_output_pattern) or len(square_training_output_pattern) gives good results
-	NUM_NODES_COL =	4
-	variance = 0.55
+	NUM_NODES_COL =	1
+	variance = 0.1
 	mu, sigma = 0, 0.1 # used for weight initialization
 	RBF_Nodes = []
 	weight = []
+
 	RANDOM_RBF_Nodes = []
 	for c in range(0, NUM_NODES_COL):
 		for r in range(0, NUM_NODES_ROW):
 			x = (x_lower_interval + ((x_upper_interval - x_lower_interval)/NUM_NODES_ROW/2)) + r * ((x_upper_interval - x_lower_interval)/NUM_NODES_ROW)
-			y = (y_lower_interval + ((y_upper_interval - y_lower_interval)/NUM_NODES_COL/2)) + c * ((y_upper_interval - y_lower_interval)/NUM_NODES_COL)
-			RANDOM_x = float(random.randint(x_lower_interval*1000, math.ceil(x_upper_interval)*1000))/1000
-			RANDOM_y = float(random.randint(y_lower_interval*1000, y_upper_interval*1000))/1000
+			#y = (y_lower_interval + ((y_upper_interval - y_lower_interval)/NUM_NODES_COL/2)) + c * ((y_upper_interval - y_lower_interval)/NUM_NODES_COL)
+			y = 0
+			#RANDOM_x = float(random.randint(x_lower_interval*1000, math.ceil(x_upper_interval)*1000))/1000
+			#RANDOM_y = float(random.randint(y_lower_interval*1000, y_upper_interval*1000))/1000
 			#print(float(random.randint(x_lower_interval*1000, math.ceil(x_upper_interval)*1000))
 			#print(x, y)
 			weight.append(np.random.normal(mu, sigma, 1)[0])
 			RBF_Nodes.append(Node(x, y, variance))
-			RANDOM_RBF_Nodes.append(Node(RANDOM_x, RANDOM_y, variance))
+			#RANDOM_RBF_Nodes.append(Node(RANDOM_x, RANDOM_y, variance))
 
 	# Calculate SIN phi
 	sin_train_phi = np.zeros((len(sin_training_input_pattern), len(RBF_Nodes)))
@@ -161,26 +167,29 @@ for nodes in range(21, 22):
 	RANDOM_sin_test_phi = np.zeros((len(sin_training_input_pattern), len(RBF_Nodes)))
 	for p in range (0, len(sin_training_input_pattern)):
 		for n in range (0, len(RBF_Nodes)):
-			#sin_train_phi[p][n] = transfer_function(sin_training_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
-			#sin_test_phi[p][n] = transfer_function(sin_test_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
-			sin_train_phi[p][n] = transfer_function_2d(sin_training_input_pattern[p], sin_training_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
-			sin_test_phi[p][n] = transfer_function_2d(sin_test_input_pattern[p], sin_test_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
-			RANDOM_sin_train_phi[p][n] = transfer_function_2d(sin_training_input_pattern[p], sin_training_output_pattern[p], RANDOM_RBF_Nodes[n].x, RANDOM_RBF_Nodes[n].y, RANDOM_RBF_Nodes[n].variance)
-			RANDOM_sin_test_phi[p][n] = transfer_function_2d(sin_test_input_pattern[p], sin_test_output_pattern[p], RANDOM_RBF_Nodes[n].x, RANDOM_RBF_Nodes[n].y, RANDOM_RBF_Nodes[n].variance)
-	'''
+			sin_train_phi[p][n] = transfer_function(sin_training_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
+			sin_test_phi[p][n] = transfer_function(sin_test_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
+			#sin_train_phi[p][n] = transfer_function_2d(sin_training_input_pattern[p], sin_training_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
+			#sin_test_phi[p][n] = transfer_function_2d(sin_test_input_pattern[p], sin_test_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
+			#RANDOM_sin_train_phi[p][n] = transfer_function_2d(sin_training_input_pattern[p], sin_training_output_pattern[p], RANDOM_RBF_Nodes[n].x, RANDOM_RBF_Nodes[n].y, RANDOM_RBF_Nodes[n].variance)
+			#RANDOM_sin_test_phi[p][n] = transfer_function_2d(sin_test_input_pattern[p], sin_test_output_pattern[p], RANDOM_RBF_Nodes[n].x, RANDOM_RBF_Nodes[n].y, RANDOM_RBF_Nodes[n].variance)
+	
 	# Calculate SQUARE phi
 	square_train_phi = np.zeros((len(square_training_input_pattern), len(RBF_Nodes)))
 	square_test_phi = np.zeros((len(square_training_input_pattern), len(RBF_Nodes)))
 	for p in range (0, len(square_training_input_pattern)):
 		for n in range (0, len(RBF_Nodes)):
-			square_train_phi[p][n] = transfer_function_2d(square_training_input_pattern[p], square_training_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
-			square_test_phi[p][n] = transfer_function_2d(square_test_input_pattern[p], square_test_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
-	'''
+			square_train_phi[p][n] = transfer_function(square_training_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
+			square_test_phi[p][n] = transfer_function(square_test_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
+			#square_train_phi[p][n] = transfer_function_2d(square_training_input_pattern[p], square_training_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
+			#square_test_phi[p][n] = transfer_function_2d(square_test_input_pattern[p], square_test_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
+	
 	'''
 	# Least squares
 	# SIN calculate weights and absolute residual error 
 	sin_least_squares_weight = np.linalg.solve(np.matmul(sin_train_phi.T, sin_train_phi), np.matmul(sin_train_phi.T, sin_training_output_pattern))
 	sin_least_squares_output_pattern = np.sum(sin_test_phi * sin_least_squares_weight, axis = 1)
+	#Batch_error.append(absolute_residual_error(sin_test_output_pattern, sin_least_squares_output_pattern))
 	print("Nodes:", nodes, "SIN Least squares absolute residual error:", absolute_residual_error(sin_test_output_pattern, sin_least_squares_output_pattern))
 	'''
 	'''
@@ -190,9 +199,15 @@ for nodes in range(21, 22):
 	binary(square_least_squares_output_pattern)
 	print("Nodes:", nodes, "SQUARE Least squares absolute residual error:", absolute_residual_error(square_test_output_pattern, square_least_squares_output_pattern))
 	'''
-
+	'''
 	end = time.time()
-	#print("Batch execution time: ", end - start)
+	Batch_time.append(end - start)
+	print("Batch execution time: ", end - start)
+	if (run == 1):
+		ax = plt.gca()
+		ax.plot(sin_test_input_pattern, sin_test_output_pattern)
+		ax.plot(sin_test_input_pattern, sin_least_squares_output_pattern)
+	'''
 	
 	# Delta rule
 	# Initiate weights
@@ -208,7 +223,10 @@ for nodes in range(21, 22):
 		#sin_batch_weight.append(weight[i])
 		#square_batch_weight.append(weight[i])
 
-	epochs = 100000
+	epochs = 1000000
+	first_milestone = False
+	second_milestone = False
+	thrid_milestone = False
 	
 	# Sequential Delta rule--------------------------------------------------------------------------------------------------------------------------------------------
 	# SIN
@@ -219,12 +237,27 @@ for nodes in range(21, 22):
 			#RANDOM_sin_sequential_weight = RANDOM_sin_sequential_weight + (learning_rate*(sin_training_output_pattern[o] - np.sum(RANDOM_sin_train_phi[o] * RANDOM_sin_sequential_weight))*(RANDOM_sin_train_phi[o]))
 		sin_sequential_output_pattern = np.sum(sin_test_phi * sin_sequential_weight, axis = 1)
 		#RANDOM_sin_sequential_output_pattern = np.sum(RANDOM_sin_test_phi * RANDOM_sin_sequential_weight, axis = 1)
-		errors.append(absolute_residual_error(sin_test_output_pattern, sin_sequential_output_pattern))
-		print("Epoch:", i, "SIN Sequential Delta rule error:", absolute_residual_error(sin_test_output_pattern, sin_sequential_output_pattern))
+		#errors.append(absolute_residual_error(sin_test_output_pattern, sin_sequential_output_pattern))
+		err = absolute_residual_error(sin_test_output_pattern, sin_sequential_output_pattern)
+		print("Epoch:", i, "SIN Sequential Delta rule error:", err)
+		if(err < 0.1):
+			if(first_milestone == False):
+				print("First milestone", i)
+				first_milestone = True
+		if(err < 0.01):
+			if(second_milestone == False):
+				print("Second milestone", i)
+				second_milestone = True
+		if(err < 0.001):
+			if(third_milestone == False):
+				print("Thrids milestone", i)
+				third_milestone = True
+				epochs = 1000000
+
 		#RANDOM_errors.append(absolute_residual_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
 		#print("Epoch:", i, "RANDOM SIN Sequential Delta rule error:", absolute_residual_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
 	#print("Nodes:", nodes, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
-	simulation_results.append(RANDOM_errors)
+	#simulation_results.append(RANDOM_errors)
 	
 	'''
 	# SQUARE
@@ -236,7 +269,7 @@ for nodes in range(21, 22):
 		#print("Epoch:", i, "SQUARE Sequential Delta rule error:", squared_error(square_test_output_pattern, square_sequential_output_pattern))
 	binary(square_sequential_output_pattern)
 	print("Nodes:", nodes, "SQUARE Sequential Delta rule error:", squared_error(square_test_output_pattern, square_sequential_output_pattern))
-	# Sequential Delta rule--------------------------------------------------------------------------------------------------------------------------------------------
+	# Sequential Delta rule--------------------square_least_squares_output_pattern------------------------------------------------------------------------------------------------------------------------
 	
 	# Batch Delta rule-------------------------------------------------------------------------------------------------------------------------------------------------
 	# SIN
@@ -278,24 +311,33 @@ for nodes in range(21, 22):
 	test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length/2), x_upper_interval, step_length))
 	test_target_pattern = list(map(sin_function, test_input_pattern))
 
-	reg = MLPRegressor(hidden_layer_sizes=args.hidden_nodes, early_stopping=False, max_iter=10000,
-		           learning_rate_init=args.learning_rate, alpha=args.alpha)
+	reg = MLPRegressor(solver='lbfgs', hidden_layer_sizes=args.hidden_nodes, early_stopping=True, max_iter=10000,
+		           learning_rate_init=args.learning_rate, alpha=args.alpha, batch_size=len(training_input_pattern))
 	reg = reg.fit(np.transpose(training_input_pattern), training_target_pattern)
 	output = reg.predict(np.transpose(training_input_pattern))
 
-	plt.plot(sin_test_input_pattern, training_target_pattern)
+	print("Two-layer absolute residual error:", absolute_residual_error(sin_test_output_pattern, output))
+	Two_layer_error.append(absolute_residual_error(sin_test_output_pattern, output))
 	
 	end = time.time()
 	print("Two-layer execution time: ", end - start)
+	Two_layer_time.append(end - start)
 	'''
+	
 sin_training_input_pattern = np.asarray(np.arange(x_lower_interval, x_upper_interval, step_length))
 sin_training_output_pattern = list(map(sin_function, sin_training_input_pattern))
 sin_test_input_pattern = np.asarray(np.arange(x_lower_interval + (step_length/2), x_upper_interval, step_length))
 sin_test_output_pattern = list(map(sin_function, sin_test_input_pattern))
-	
+'''
+print("")
+print("Batch average absolute residual error: ", sum(Batch_error)/10)
+print("Batch average execution time: ", sum(Batch_time)/10)
+print("Two-layer average absolute residual error: ", sum(Two_layer_error)/10)
+print("Two-layer average execution time: ", sum(Two_layer_time)/10)
+'''
 # Plot
 ax = plt.gca()
-
+'''
 # Plot nodes
 X = []
 Y = []
@@ -308,17 +350,19 @@ for node in RBF_Nodes:
 ax.plot(X, Y, "ro")
 for circle in Circles:
 	ax.add_artist(circle)
-
+'''
 
 # Plot data
 ax.plot(sin_test_input_pattern, sin_test_output_pattern)
-#ax.plot(sin_test_input_pattern, sin_sequential_output_pattern)
+#ax.plot(square_test_input_pattern, square_test_output_pattern)
+#ax.plot(square_test_input_pattern, square_least_squares_output_pattern)
+ax.plot(sin_test_input_pattern, sin_sequential_output_pattern)
 #ax.plot(sin_test_input_pattern, sin_least_squares_output_pattern)
 #ax.plot(sin_test_input_pattern, output)
-plt.ylim( (-3, 3) )
-#ax.legend(['y = sin(2x)', 'y = batch prediction', 'y = two-layer'])
-plt.ylabel('Estimated function value')
-plt.xlabel('Input value')
+#plt.ylim( (-3, 3) )
+#ax.legend(['y = sin(2x)', 'y = batch', 'y = two-layer'])
+#plt.ylabel('Estimated function value')
+#plt.xlabel('Input value')
 #plt.ylim( (0, 0.5) )
 #print(simulation_results[0][0:epochs])
 #print(simulation_results[3][0:epochs])
