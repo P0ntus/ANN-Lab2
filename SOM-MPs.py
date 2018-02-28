@@ -3,6 +3,7 @@ import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 # We format the given data from animals.dat
 os.chdir( os.path.dirname(os.path.abspath(__file__)) )
@@ -102,14 +103,15 @@ for i in range(0, nodes[0]):
 weights = np.asarray(weights)
 votes = np.asarray(votes)
 
+print( votes )
+
 """
 # Print the weights for test :
-print( weights[0].shape )
-print( matrix[0].shape )
+print( weights.shape )
 """
 
 # We create n_parameter class, use neightbours_parameter.get_number()
-neightbours_parameter = n_parameter( 2, 1, epochs)
+neightbours_parameter = n_parameter( 1, 1, epochs)
 
 #TRAINING
 for l in range(0, epochs):
@@ -124,12 +126,14 @@ for l in range(0, epochs):
 
 		for i in range( 0, nodes[0]) :
 			for j in range( 0, nodes[1]) :
-				result = distance( votes[m], weights[i][j] )
+				result = distance( votes[m], weights[i][j] ) # weights is 3D
 				if min_distance > result :
 					min_distance = result
 					index = (i, j)
-		
-
+		"""
+		print( index )
+		print( "FOUND" )	
+		"""
 		
 		# Once we have the index of the winner, we can update the weights of the winner and those of the neighbourhoods
 		
@@ -177,13 +181,31 @@ print( sorted_array )
 # Plot the results
 print( pos )
 
+# ------- INIT 
+sort_party = []
+for i in range( 0, 8 ):
+	sort_party.append( [] )
+	sort_party[i].append( [] )
+	sort_party[i].append( [] )
 
+print(sort_party)
 
+# % Coding: 0=no party, 1='m', 2='fp', 3='s', 4='v', 5='mp', 6='kd', 7='c'
+for m in range( 0, len( pos )):
+	print( pos[m][0][1] )
+	sort_party[ pos[m][0][1] ][0].append( pos[m][1][0] ) # pos[m][1][0] is the int for the party !!
+	sort_party[ pos[m][0][1] ][1].append( pos[m][1][1] )
 
+color=iter(cm.rainbow(np.linspace(0,1,8)))
+print( sort_party )
+for i in range(0, 8):
+	c=next(color)
+	plt.plot(sort_party[i][0], sort_party[i][1], 'ro', label= str( i ), c=c )
 
+plt.xlim(-1,11)
+plt.ylim(-1,11)
 
-
-
+plt.show()
 
 
 
