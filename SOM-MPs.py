@@ -64,7 +64,7 @@ nodes = (10, 10) # 2-dimensionnal grid
 weights = []
 low = 0
 high = 1
-epochs = 20
+epochs = 100
 learning_rate = 0.2
 learning_rate_n = 0.2
 
@@ -111,7 +111,7 @@ print( weights.shape )
 """
 
 # We create n_parameter class, use neightbours_parameter.get_number()
-neightbours_parameter = n_parameter( 1, 1, epochs)
+neightbours_parameter = n_parameter( 2, 1, epochs)
 
 #TRAINING
 for l in range(0, epochs):
