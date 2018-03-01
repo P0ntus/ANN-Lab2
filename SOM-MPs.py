@@ -5,6 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
+# For 3D plotting
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
 # We format the given data from animals.dat
 os.chdir( os.path.dirname(os.path.abspath(__file__)) )
 
@@ -64,7 +69,7 @@ nodes = (10, 10) # 2-dimensionnal grid
 weights = []
 low = 0
 high = 1
-epochs = 100
+epochs = 20
 learning_rate = 0.2
 learning_rate_n = 0.2
 
@@ -111,7 +116,7 @@ print( weights.shape )
 """
 
 # We create n_parameter class, use neightbours_parameter.get_number()
-neightbours_parameter = n_parameter( 2, 1, epochs)
+neightbours_parameter = n_parameter( 0, 1, epochs)
 
 #TRAINING
 for l in range(0, epochs):
@@ -182,28 +187,95 @@ print( sorted_array )
 print( pos )
 
 # ------- INIT 
+
+"""
 sort_party = []
 for i in range( 0, 8 ):
 	sort_party.append( [] )
 	sort_party[i].append( [] )
 	sort_party[i].append( [] )
 
-print(sort_party)
-
 # % Coding: 0=no party, 1='m', 2='fp', 3='s', 4='v', 5='mp', 6='kd', 7='c'
 for m in range( 0, len( pos )):
-	print( pos[m][0][1] )
 	sort_party[ pos[m][0][1] ][0].append( pos[m][1][0] ) # pos[m][1][0] is the int for the party !!
 	sort_party[ pos[m][0][1] ][1].append( pos[m][1][1] )
 
 color=iter(cm.rainbow(np.linspace(0,1,8)))
 print( sort_party )
+
+m='o'
+
 for i in range(0, 8):
 	c=next(color)
-	plt.plot(sort_party[i][0], sort_party[i][1], 'ro', label= str( i ), c=c )
+	xs = sort_party[i][0]
+	ys = sort_party[i][1]
+	zs = i
+	ax.scatter(xs, ys, zs, c=c, marker=m)
 
-plt.xlim(-1,11)
-plt.ylim(-1,11)
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Each party')
+"""
+"""
+sort_gender = []
+for i in range( 0, 2 ):
+	sort_gender.append( [] )
+	sort_gender[i].append( [] )
+	sort_gender[i].append( [] )
+
+# % Coding: 0=no party, 1='m', 2='fp', 3='s', 4='v', 5='mp', 6='kd', 7='c'
+for m in range( 0, len( pos )):
+	sort_gender[ pos[m][0][2] ][0].append( pos[m][1][0] ) # pos[m][1][0] is the int for the party !!
+	sort_gender[ pos[m][0][2] ][1].append( pos[m][1][1] )
+
+color=iter(cm.rainbow(np.linspace(0,1,8)))
+print( sort_gender )
+
+m='o'
+
+for i in range(0, 2):
+	c=next(color)
+	xs = sort_gender[i][0]
+	ys = sort_gender[i][1]
+	zs = i
+	ax.scatter(xs, ys, zs, c=c, marker=m)
+
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Gender (0 Male/ 1 Female)')
+"""
+
+sort_district = []
+for i in range( 0, 30 ):
+	sort_district.append( [] )
+	sort_district[i].append( [] )
+	sort_district[i].append( [] )
+
+# % Coding: 0=no party, 1='m', 2='fp', 3='s', 4='v', 5='mp', 6='kd', 7='c'
+for m in range( 0, len( pos )):
+	sort_district[ pos[m][0][3] ][0].append( pos[m][1][0] ) # pos[m][1][0] is the int for the party !!
+	sort_district[ pos[m][0][3] ][1].append( pos[m][1][1] )
+
+color=iter(cm.rainbow(np.linspace(0,1,30)))
+print( sort_district )
+
+m='o'
+
+for i in range(0, 30):
+	c=next(color)
+	xs = sort_district[i][0]
+	ys = sort_district[i][1]
+	zs = i
+	ax.scatter(xs, ys, zs, c=c, marker=m)
+
+
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('District')
+
+
 
 plt.show()
 

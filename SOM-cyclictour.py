@@ -26,7 +26,7 @@ nodes = 10
 weights = []
 low = 0
 high = 1
-epochs = 20
+epochs = 100
 learning_rate = 0.2
 learning_rate_n = 0.2
 
@@ -70,7 +70,7 @@ print( matrix[0].shape )
 """
 
 # We create n_parameter class, use neightbours_parameter.get_number()
-neightbours_parameter = n_parameter( 2, 1, epochs)
+neightbours_parameter = n_parameter( 1, 1, epochs)
 
 #TRAINING
 for i in range(0, epochs):
@@ -98,7 +98,7 @@ for i in range(0, epochs):
 		# Neighbourhoods update according to neightbours_parameter and learning_rate_n
 
 		for k in range( index-n_number, index+n_number ):
-			if k > nodes: # cyclic tour
+			if k >= nodes: # cyclic tour
 				k = k % nodes
 			weights[k] += learning_rate_n * (matrix[j] - weights[k])
 
@@ -107,6 +107,8 @@ for i in range(0, epochs):
 #PRINT
 # this time we range the weight for each input to find the clothest one, and we save index
 pos = []
+X = []
+Y = []
 for j in range(0, len(matrix)):
 	min_distance = distance( matrix[j], weights[0] )
 	index = 0
@@ -117,18 +119,29 @@ for j in range(0, len(matrix)):
 			index = k
 
 	pos.append( (j,index) )
+	X.append( matrix[j][0] )
+	Y.append( matrix[j][1] )
 	
 
 
 # Sort the list to find similarities of animals
-dtype = [('j', int), ('i', int)]
+dtype = [('city', int), ('i', int)]
 sorted_array = np.array(pos, dtype=dtype)
 sorted_array = np.sort(sorted_array, order='i')
 
 print( sorted_array )
 
+# Plot section
+for i in range(0, len(matrix) - 1):
+	city1 = sorted_array[i][0]
+	city2 = sorted_array[i+1][0]
+   	plt.plot( [X[ city1 ],X[ city2 ]] , [Y[ city1 ],Y[ city2 ]] , 'ro-')
 
+city1 = sorted_array[len(matrix) - 1][0]
+city2 = sorted_array[0][0]
+plt.plot( [X[ city1 ],X[ city2 ]] , [Y[ city1 ],Y[ city2 ]] , 'ro-') # Final point
 
+plt.show()
 
 
 
