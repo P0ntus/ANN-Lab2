@@ -91,7 +91,7 @@ def shuffle(A, B):
 def shuffle_3(A, B, C):
 	temp_A = np.copy(A)
 	temp_B = np.copy(B)
-	temp_C = np.copy(B)
+	temp_C = np.copy(C)
 	D = np.asarray(np.arange(0, len(A), 1))
 	random.shuffle(D)
 	for i in range(0, len(D)):
@@ -108,9 +108,9 @@ Two_layer_time = []
 sum_first_milestone = 0
 sum_second_milestone = 0
 sum_third_milestone = 0
-for runs in range(1, 11):#11):
-	
-	nodes = 63
+for runs in range(1, 26):#11):
+	print("Epochs: ", runs)
+	nodes = 50
 	learning_rate = 0.1
 	#learning_rate = float(0.1) / (2**learning)
 	#print(learning_rate)
@@ -144,7 +144,7 @@ for runs in range(1, 11):#11):
 	start = time.time()
 	NUM_NODES_ROW = nodes # Using len(sin_training_output_pattern) or len(square_training_output_pattern) gives good results
 	NUM_NODES_COL =	1
-	variance = 0.5
+	variance = 0.1
 	mu, sigma = 0, 0.1 # used for weight initialization
 	RBF_Nodes = []
 	weight = []
@@ -155,13 +155,13 @@ for runs in range(1, 11):#11):
 			x = (x_lower_interval + ((x_upper_interval - x_lower_interval)/NUM_NODES_ROW/2)) + r * ((x_upper_interval - x_lower_interval)/NUM_NODES_ROW)
 			#y = (y_lower_interval + ((y_upper_interval - y_lower_interval)/NUM_NODES_COL/2)) + c * ((y_upper_interval - y_lower_interval)/NUM_NODES_COL)
 			y = 0
-			#RANDOM_x = float(random.randint(x_lower_interval*1000, math.ceil(x_upper_interval)*1000))/1000
-			#RANDOM_y = 0
+			RANDOM_x = float(random.randint(x_lower_interval*1000, math.ceil(x_upper_interval)*1000))/1000
+			RANDOM_y = 0
 			#print(float(random.randint(x_lower_interval*1000, math.ceil(x_upper_interval)*1000))
 			#print(x, y)
 			weight.append(np.random.normal(mu, sigma, 1)[0])
 			RBF_Nodes.append(Node(x, y, variance))
-			#RANDOM_RBF_Nodes.append(Node(RANDOM_x, RANDOM_y, variance))
+			RANDOM_RBF_Nodes.append(Node(RANDOM_x, RANDOM_y, variance))
 
 	# Calculate SIN phi
 	sin_train_phi = np.zeros((len(sin_training_input_pattern), len(RBF_Nodes)))
@@ -174,8 +174,9 @@ for runs in range(1, 11):#11):
 			sin_test_phi[p][n] = transfer_function(sin_test_input_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].variance)
 			#sin_train_phi[p][n] = transfer_function_2d(sin_training_input_pattern[p], sin_training_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
 			#sin_test_phi[p][n] = transfer_function_2d(sin_test_input_pattern[p], sin_test_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
-			#RANDOM_sin_train_phi[p][n] = transfer_function(sin_training_input_pattern[p], RANDOM_RBF_Nodes[n].x, RANDOM_RBF_Nodes[n].variance)
-			#RANDOM_sin_test_phi[p][n] = transfer_function(sin_test_input_pattern[p], RANDOM_RBF_Nodes[n].x, RANDOM_RBF_Nodes[n].variance)
+			RANDOM_sin_train_phi[p][n] = transfer_function(sin_training_input_pattern[p], RANDOM_RBF_Nodes[n].x, RANDOM_RBF_Nodes[n].variance)
+			RANDOM_sin_test_phi[p][n] = transfer_function(sin_test_input_pattern[p], RANDOM_RBF_Nodes[n].x, RANDOM_RBF_Nodes[n].variance)
+	
 	'''
 	# Calculate SQUARE phi
 	square_train_phi = np.zeros((len(square_training_input_pattern), len(RBF_Nodes)))
@@ -187,14 +188,14 @@ for runs in range(1, 11):#11):
 			#square_train_phi[p][n] = transfer_function_2d(square_training_input_pattern[p], square_training_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
 			#square_test_phi[p][n] = transfer_function_2d(square_test_input_pattern[p], square_test_output_pattern[p], RBF_Nodes[n].x, RBF_Nodes[n].y, RBF_Nodes[n].variance)
 	'''
-	
+	'''
 	# Least squares
 	# SIN calculate weights and absolute residual error 
 	sin_least_squares_weight = np.linalg.solve(np.matmul(sin_train_phi.T, sin_train_phi), np.matmul(sin_train_phi.T, sin_training_output_pattern))
 	sin_least_squares_output_pattern = np.sum(sin_test_phi * sin_least_squares_weight, axis = 1)
 	Batch_error.append(absolute_residual_error(sin_test_output_pattern, sin_least_squares_output_pattern))
 	print("Nodes:", nodes, "SIN Least squares absolute residual error:", absolute_residual_error(sin_test_output_pattern, sin_least_squares_output_pattern))
-	
+	'''
 	'''
 	#SQUARE calculate weights and absolute residual error
 	square_least_squares_weight = np.linalg.solve(np.matmul(square_train_phi.T, square_train_phi), np.matmul(square_train_phi.T, square_training_output_pattern))
@@ -203,8 +204,8 @@ for runs in range(1, 11):#11):
 	print("Nodes:", nodes, "SQUARE Least squares absolute residual error:", absolute_residual_error(square_test_output_pattern, square_least_squares_output_pattern))
 	'''
 	
-	end = time.time()
-	Batch_time.append(end - start)
+	#end = time.time()
+	#Batch_time.append(end - start)
 	'''
 	print("Batch execution time: ", end - start)
 	if (run == 1):
@@ -212,22 +213,22 @@ for runs in range(1, 11):#11):
 		ax.plot(sin_test_input_pattern, sin_test_output_pattern)
 		ax.plot(sin_test_input_pattern, sin_least_squares_output_pattern)
 	'''
-	'''
+	
 	# Delta rule
 	# Initiate weights
 	sin_sequential_weight  = []
-	#RANDOM_sin_sequential_weight  = []
+	RANDOM_sin_sequential_weight  = []
 	#square_sequential_weight = []
 	#sin_batch_weight = []
 	#square_batch_weight = []
 	for i in range(0, len(weight)):
 		sin_sequential_weight.append(weight[i])
-		#RANDOM_sin_sequential_weight.append(weight[i])
+		RANDOM_sin_sequential_weight.append(weight[i])
 		#square_sequential_weight.append(weight[i])
 		#sin_batch_weight.append(weight[i])
 		#square_batch_weight.append(weight[i])
 
-	epochs = 100000
+	epochs = 1000
 	first_milestone = False
 	second_milestone = False
 	third_milestone = False
@@ -238,14 +239,16 @@ for runs in range(1, 11):#11):
 		shuffle_3(sin_training_output_pattern, sin_train_phi, RANDOM_sin_train_phi)
 		for o in range(0, len(sin_training_output_pattern)):
 			sin_sequential_weight = sin_sequential_weight + (learning_rate*(sin_training_output_pattern[o] - np.sum(sin_train_phi[o] * sin_sequential_weight))*(sin_train_phi[o]))
-			#RANDOM_sin_sequential_weight = RANDOM_sin_sequential_weight + (learning_rate*(sin_training_output_pattern[o] - np.sum(RANDOM_sin_train_phi[o] * RANDOM_sin_sequential_weight))*(RANDOM_sin_train_phi[o]))
+			RANDOM_sin_sequential_weight = RANDOM_sin_sequential_weight + (learning_rate*(sin_training_output_pattern[o] - np.sum(RANDOM_sin_train_phi[o] * RANDOM_sin_sequential_weight))*(RANDOM_sin_train_phi[o]))
 		sin_sequential_output_pattern = np.sum(sin_test_phi * sin_sequential_weight, axis = 1)
-		#RANDOM_sin_sequential_output_pattern = np.sum(RANDOM_sin_test_phi * RANDOM_sin_sequential_weight, axis = 1)
+		RANDOM_sin_sequential_output_pattern = np.sum(RANDOM_sin_test_phi * RANDOM_sin_sequential_weight, axis = 1)
 		errors.append(absolute_residual_error(sin_test_output_pattern, sin_sequential_output_pattern))
-		#RANDOM_errors.append(absolute_residual_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
+		RANDOM_errors.append(absolute_residual_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
 		err = absolute_residual_error(sin_test_output_pattern, sin_sequential_output_pattern)
 		#print("Epoch:", i, "SIN Sequential Delta rule error:", err)
-		
+	simulation_results.append(errors)
+	random_simulation_results.append(RANDOM_errors)
+	'''	
 		if(err < 0.1):
 			if(first_milestone == False):
 				print("First milestone", i)
@@ -270,13 +273,12 @@ for runs in range(1, 11):#11):
 	if(third_milestone == False):
 		print("Third milestone failed to find solution")
 	print("")
-	
+	'''
 	
 		#print("Epoch:", i, "RANDOM SIN Sequential Delta rule error:", absolute_residual_error(sin_test_output_pattern, RANDOM_sin_sequential_output_pattern))
-	print("Nodes:", nodes, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
-	simulation_results.append(errors)
-	#random_simulation_results.append(RANDOM_errors)
+	#print("Nodes:", nodes, "SIN Sequential Delta rule error:", squared_error(sin_test_output_pattern, sin_sequential_output_pattern))
 	
+	'''
 	
 	# SQUARE
 	for i in range(0, epochs):
@@ -309,7 +311,7 @@ for runs in range(1, 11):#11):
 	print("Nodes:", nodes, "SQUARE Batch Delta rule error:", squared_error(square_test_output_pattern, square_batch_output_pattern))
 	# Batch Delta rule-------------------------------------------------------------------------------------------------------------------------------------------------
 	'''
-	
+	'''
 	start = time.time()
 	#ANN
 	parser = argparse.ArgumentParser(description='MLP network for Mackey-Glass time series predictions.')
@@ -340,7 +342,7 @@ for runs in range(1, 11):#11):
 	end = time.time()
 	print("Two-layer execution time: ", end - start)
 	Two_layer_time.append(end - start)
-	
+	'''
 	
 #print("Two-layer average absolute residual error: ", sum(Two_layer_error)/10)
 '''
@@ -348,6 +350,7 @@ print("First milestone average", sum_first_milestone/runs)
 print("Second milestone average: ", sum_second_milestone/runs)
 print("Third milestone average: ", sum_third_milestone/runs)
 #print("Third milestone average: ", runs)
+'''
 '''
 sin_training_input_pattern = np.asarray(np.arange(x_lower_interval, x_upper_interval, step_length))
 sin_training_output_pattern = list(map(sin_function, sin_training_input_pattern))
@@ -359,7 +362,7 @@ print("Batch average absolute residual error: ", sum(Batch_error)/runs)
 print("Batch average execution time: ", sum(Batch_time)/runs)
 print("Two-layer average absolute residual error: ", sum(Two_layer_error)/runs)
 print("Two-layer average execution time: ", sum(Two_layer_time)/runs)
-
+'''
 # Plot
 #ax = plt.gca()
 '''
@@ -403,6 +406,7 @@ ax.legend(['Learning rate = 0.1', 'Learning rate = 0.05', 'Learning rate = 0.025
 plt.ylabel('Absolute residual error')
 plt.xlabel('Epochs')
 '''
+ax = plt.gca()
 '''
 ax.plot(simulation_results[0], color='C0')
 ax.plot(simulation_results[1], color='C0')
@@ -424,13 +428,29 @@ ax.plot(random_simulation_results[6], color='C3')
 ax.plot(random_simulation_results[7], color='C3')
 ax.plot(random_simulation_results[8], color='C3')
 ax.plot(random_simulation_results[9], color='C3')
+'''
 
 
-#ax.legend(['y = Manually placed'])
+a = np.zeros(len(simulation_results[0]))
+b = np.zeros(len(simulation_results[0]))
+
+for i in range(0, len(a)):
+	for j in range(0, len(simulation_results)):
+		a[i] = a[i] + simulation_results[j][i]
+		b[i] = b[i] + random_simulation_results[j][i]
+	a[i] = a[i]/10
+	b[i] = b[i]/10
+
+#print(a)
+#print(b)
+
+ax.plot(a)
+ax.plot(b)
+
+ax.legend(['y = Manually placed', 'y = Randomly placed'])
 plt.ylabel('Absolute residual error')
 plt.xlabel('Epochs')
-'''
-#plt.show()
 
+plt.show()
 
 
